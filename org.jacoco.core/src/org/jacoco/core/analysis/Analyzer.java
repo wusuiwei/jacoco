@@ -12,15 +12,6 @@
  *******************************************************************************/
 package org.jacoco.core.analysis;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.StringTokenizer;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import org.jacoco.core.JaCoCo;
 import org.jacoco.core.data.ExecutionData;
 import org.jacoco.core.data.ExecutionDataStore;
@@ -31,11 +22,21 @@ import org.jacoco.core.internal.analysis.ClassAnalyzer;
 import org.jacoco.core.internal.analysis.ClassCoverageImpl;
 import org.jacoco.core.internal.analysis.StringPool;
 import org.jacoco.core.internal.data.CRC64;
+import org.jacoco.core.internal.diff.CodeDiffUtil;
 import org.jacoco.core.internal.flow.ClassProbesAdapter;
 import org.jacoco.core.internal.instr.InstrSupport;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.StringTokenizer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * An {@link Analyzer} instance processes a set of Java class files and
@@ -112,9 +113,17 @@ public class Analyzer {
 		if ((reader.getAccess() & Opcodes.ACC_SYNTHETIC) != 0) {
 			return;
 		}
-		final ClassVisitor visitor = createAnalyzingVisitor(classId,
-				reader.getClassName());
-		reader.accept(visitor, 0);
+		// 字段不为空说明是增量覆盖
+		if (null != CoverageBuilder.classInfos
+				&& !CoverageBuilder.classInfos.isEmpty()) {
+			// 如果没有匹配到增量代码就无需解析类
+			if (!CodeDiffUtil.checkClassIn(reader.getClassName())) {
+				return;
+			}
+			final ClassVisitor visitor = createAnalyzingVisitor(classId,
+					reader.getClassName());
+			reader.accept(visitor, 0);
+		}
 	}
 
 	/**

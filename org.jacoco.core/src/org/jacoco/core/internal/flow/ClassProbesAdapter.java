@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.jacoco.core.internal.flow;
 
+import org.jacoco.core.analysis.CoverageBuilder;
+import org.jacoco.core.internal.diff.CodeDiffUtil;
 import org.jacoco.core.internal.instr.InstrSupport;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -68,7 +70,19 @@ public class ClassProbesAdapter extends ClassVisitor
 		if (mv == null) {
 			// We need to visit the method in any case, otherwise probe ids
 			// are not reproducible
-			methodProbes = EMPTY_METHOD_PROBES_VISITOR;
+			// methodProbes = EMPTY_METHOD_PROBES_VISITOR;
+
+			// 增量代码，有点绕，由于参数定义成final,无法第二次指定,代码无法简化
+			if (null != CoverageBuilder.classInfos
+					&& !CoverageBuilder.classInfos.isEmpty()) {
+				if (CodeDiffUtil.checkMethodIn(this.name, name, desc)) {
+					methodProbes = mv;
+				} else {
+					methodProbes = EMPTY_METHOD_PROBES_VISITOR;
+				}
+			} else {
+				methodProbes = mv;
+			}
 		} else {
 			methodProbes = mv;
 		}

@@ -53,7 +53,8 @@ public class Report extends Command {
 
 	@Option(name = "--sourcefiles", usage = "location of the source files", metaVar = "<path>")
 	List<File> sourcefiles = new ArrayList<File>();
-
+	@Option(name = "--diffCode", usage = "input diff code", metaVar = "<file>")
+	String diffCode;
 	@Option(name = "--tabwith", usage = "tab stop width for the source pages (default 4)", metaVar = "<n>")
 	int tabwidth = 4;
 

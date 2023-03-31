@@ -12,14 +12,12 @@
  *******************************************************************************/
 package org.jacoco.core.analysis;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.alibaba.fastjson2.JSON;
 import org.jacoco.core.internal.analysis.BundleCoverageImpl;
 import org.jacoco.core.internal.analysis.SourceFileCoverageImpl;
+import org.jacoco.core.internal.diff.ClassInfoDTO;
+
+import java.util.*;
 
 /**
  * Builder for hierarchical {@link ICoverageNode} structures from single
@@ -42,12 +40,24 @@ public class CoverageBuilder implements ICoverageVisitor {
 	private final Map<String, ISourceFileCoverage> sourcefiles;
 
 	/**
+	 * 新增代码类
+	 */
+	public static List<ClassInfoDTO> classInfos;
+
+	/**
 	 * Create a new builder.
-	 *
 	 */
 	public CoverageBuilder() {
 		this.classes = new HashMap<String, IClassCoverage>();
 		this.sourcefiles = new HashMap<String, ISourceFileCoverage>();
+	}
+
+	public CoverageBuilder(String classList) {
+		this.classes = new HashMap<String, IClassCoverage>();
+		this.sourcefiles = new HashMap<String, ISourceFileCoverage>();
+		if (null != classList && !"".equals(classList)) {
+			classInfos = JSON.parseArray(classList, ClassInfoDTO.class);
+		}
 	}
 
 	/**
@@ -83,8 +93,8 @@ public class CoverageBuilder implements ICoverageVisitor {
 	/**
 	 * Returns all classes for which execution data does not match.
 	 *
-	 * @see IClassCoverage#isNoMatch()
 	 * @return collection of classes with non-matching execution data
+	 * @see IClassCoverage#isNoMatch()
 	 */
 	public Collection<IClassCoverage> getNoMatchClasses() {
 		final Collection<IClassCoverage> result = new ArrayList<IClassCoverage>();
