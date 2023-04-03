@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.jacoco.cli.internal.commands;
 
-import com.alibaba.fastjson2.JSON;
 import org.jacoco.cli.internal.Command;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
@@ -32,6 +31,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -52,8 +53,8 @@ public class Report extends Command {
     @Option(name = "--diffCode", usage = "input String for diff", metaVar = "<file>")
     String diffCode;
 
-    @Option(name = "--diffCodeFiles", usage = "input file for diff", metaVar = "<path>")
-    String diffCodeFiles;
+    @Option(name = "--diffCodeFile", usage = "input file for diff", metaVar = "<path>")
+    String diffCodeFile;
     @Option(name = "--tabwith", usage = "tab stop width for the source pages (default 4)", metaVar = "<n>")
     int tabwidth = 4;
 
@@ -104,11 +105,10 @@ public class Report extends Command {
 
     private IBundleCoverage analyze(final ExecutionDataStore data,
                                     final PrintWriter out) throws IOException {
-		CoverageBuilder builder = null;
+        CoverageBuilder builder = null;
         // 如果有增量参数将其设置进去
-        if (null != this.diffCodeFiles) {
-            builder = new CoverageBuilder(
-					JSON.toJSONString(this.diffCodeFiles));
+        if (null != this.diffCodeFile) {
+            builder = new CoverageBuilder(new String(Files.readAllBytes(Paths.get(diffCodeFile))));
         } else if (null != this.diffCode) {
             builder = new CoverageBuilder(this.diffCode);
         } else {
