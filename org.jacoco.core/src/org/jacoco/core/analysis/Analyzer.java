@@ -120,10 +120,11 @@ public class Analyzer {
 			if (!CodeDiffUtil.checkClassIn(reader.getClassName())) {
 				return;
 			}
-			final ClassVisitor visitor = createAnalyzingVisitor(classId,
-					reader.getClassName());
-			reader.accept(visitor, 0);
 		}
+		final ClassVisitor visitor = createAnalyzingVisitor(classId,
+				reader.getClassName());
+		// 访问者模式，传递visitor，这里会调用ClassProbesAdapter的visit方法
+		reader.accept(visitor, 0);
 	}
 
 	/**
